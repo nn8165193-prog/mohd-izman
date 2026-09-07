@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>root@portfolio ~ % </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #05060f;
+    --bg-panel: #0b0e1e;
+    --bg-panel-2: #10142a;
+    --blue: #4f7dff;
+    --blue-bright: #7aa2ff;
+    --purple: #9b6bff;
+    --purple-bright: #b78dff;
+    --cyan: #5ee7ff;
+    --text: #dbe2ff;
+    --text-dim: #7c85b3;
+    --border: rgba(124,133,201,0.18);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    overflow-x:hidden;
+    position:relative;
+  }
+  ::selection{background:var(--purple); color:#fff;}
+
+  /* ---------- FEATURE 1: Matrix-style code rain canvas background ---------- */
+  #rain{
+    position:fixed; inset:0; z-index:0; opacity:0.35;
+  }
+  .bg-glow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 800px 500px at 15% 0%, rgba(79,125,255,0.20), transparent 60%),
+      radial-gradient(ellipse 700px 600px at 90% 20%, rgba(155,107,255,0.18), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 50% 100%, rgba(94,231,255,0.08), transparent 60%);
+  }
+  .scanlines{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode:overlay;
+  }
+
+  section, header, footer{position:relative; z-index:2;}
+
+  /* ---------- FEATURE 2: Fixed terminal-style nav bar ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 6vw;
+    background:rgba(5,6,15,0.75);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-brand{
+    font-family:var(--mono); font-weight:700; font-size:15px;
+    color:var(--cyan); display:flex; align-items:center; gap:8px;
+  }
+  .nav-brand .dot{width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan); animation:blink 1.6s infinite;}
+  @keyframes blink{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+  .nav-links{display:flex; gap:32px; font-family:var(--mono); font-size:13px;}
+  .nav-links a{color:var(--text-dim); text-decoration:none; transition:color .2s;}
+  .nav-links a:hover{color:var(--blue-bright);}
+  .nav-links a::before{content:"./"; color:var(--purple);}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    padding:0 6vw;
+    max-width:1200px;
+  }
+  .terminal-window{
+    width:100%; max-width:680px;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(155,107,255,0.05);
+    margin-bottom:36px;
+    overflow:hidden;
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; background:var(--bg-panel-2);
+    border-bottom:1px solid var(--border);
+  }
+  .term-dot{width:11px; height:11px; border-radius:50%;}
+  .term-bar span:nth-child(1){background:#ff5f57;}
+  .term-bar span:nth-child(2){background:#febc2e;}
+  .term-bar span:nth-child(3){background:#28c840;}
+  .term-title{margin-left:8px; font-family:var(--mono); font-size:11px; color:var(--text-dim);}
+  .term-body{padding:18px 20px; font-family:var(--mono); font-size:14px; line-height:1.8;}
+  .term-body .prompt{color:var(--cyan);}
+  .term-body .path{color:var(--purple-bright);}
+  #typed-line{color:var(--text);}
+  .cursor{display:inline-block; width:8px; height:16px; background:var(--blue-bright); margin-left:2px; animation:blink .9s infinite; vertical-align:middle;}
+
+  h1.headline{
+    font-family:var(--sans); font-weight:700;
+    font-size:clamp(38px, 6vw, 76px);
+    line-height:1.05;
+    background:linear-gradient(100deg, var(--text) 30%, var(--blue-bright) 60%, var(--purple-bright) 90%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    max-width:850px;
+  }
+  .hero-sub{
+    font-family:var(--mono); color:var(--text-dim); font-size:16px;
+    margin-top:20px; max-width:560px;
+  }
+  .hero-cta{display:flex; gap:16px; margin-top:36px; flex-wrap:wrap;}
+  .btn{
+    font-family:var(--mono); font-size:14px; padding:13px 26px;
+    border-radius:6px; text-decoration:none; cursor:pointer; border:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(120deg, var(--blue), var(--purple));
+    color:#fff; box-shadow:0 8px 24px rgba(107,90,255,0.35);
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(107,90,255,0.5);}
+  .btn-ghost{
+    border:1px solid var(--border); color:var(--text);
+    background:rgba(255,255,255,0.02);
+  }
+  .btn-ghost:hover{border-color:var(--blue-bright); color:var(--blue-bright);}
+
+  /* ---------- FEATURE 3: Live system-status widget ---------- */
+  .status-bar{
+    position:absolute; top:100px; right:6vw;
+    font-family:var(--mono); font-size:12px; color:var(--text-dim);
+    border:1px solid var(--border); border-radius:8px; padding:14px 18px;
+    background:rgba(11,14,30,0.6); backdrop-filter:blur(8px);
+    display:none;
+  }
+  @media(min-width:1080px){ .status-bar{display:block;} }
+  .status-bar div{margin-bottom:6px; display:flex; justify-content:space-between; gap:24px;}
+  .status-bar span.val{color:var(--cyan);}
+
+  /* ---------- SECTION shared ---------- */
+  .section{padding:110px 6vw; max-width:1200px; margin:0 auto;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--purple-bright);
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow .line{width:30px; height:1px; background:var(--purple-bright);}
+  h2.section-title{
+    font-size:clamp(28px,4vw,44px); font-weight:700; max-width:700px; line-height:1.15;
+  }
+
+  /* ---------- FEATURE 4: About + animated skill bars ---------- */
+  .about-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:70px; margin-top:50px; align-items:start;}
+  @media(max-width:860px){.about-grid{grid-template-columns:1fr;}}
+  .about-text p{color:var(--text-dim); line-height:1.85; margin-bottom:18px; font-size:15.5px;}
+  .about-text strong{color:var(--text); font-weight:600;}
+  .skill{margin-bottom:20px;}
+  .skill-top{display:flex; justify-content:space-between; font-family:var(--mono); font-size:13px; margin-bottom:8px;}
+  .skill-top span:last-child{color:var(--cyan);}
+  .skill-track{height:6px; border-radius:4px; background:var(--bg-panel-2); overflow:hidden; border:1px solid var(--border);}
+  .skill-fill{height:100%; border-radius:4px; background:linear-gradient(90deg, var(--blue), var(--purple)); width:0%; transition:width 1.4s cubic-bezier(.22,1,.36,1);}
+
+  /* ---------- FEATURE 5: Project cards with hover glow ---------- */
+  .projects-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:26px; margin-top:50px;}
+  @media(max-width:960px){.projects-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:640px){.projects-grid{grid-template-columns:1fr;}}
+  .project-card{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+    padding:26px; position:relative; overflow:hidden;
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .project-card::before{
+    content:""; position:absolute; inset:0; opacity:0; transition:opacity .3s ease;
+    background:radial-gradient(300px 200px at var(--mx,50%) var(--my,0%), rgba(122,162,255,0.16), transparent 70%);
+  }
+  .project-card:hover{transform:translateY(-6px); border-color:rgba(122,162,255,0.4);}
+  .project-card:hover::before{opacity:1;}
+  .project-tag{font-family:var(--mono); font-size:11px; color:var(--cyan); border:1px solid rgba(94,231,255,0.3); padding:4px 10px; border-radius:20px; display:inline-block; margin-bottom:16px;}
+  .project-card h3{font-size:20px; margin-bottom:10px; font-weight:600;}
+  .project-card p{color:var(--text-dim); font-size:14px; line-height:1.7; margin-bottom:18px;}
+  .project-stack{display:flex; gap:8px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; color:var(--text-dim);}
+  .project-stack span{border:1px solid var(--border); padding:3px 9px; border-radius:5px;}
+
+  /* ---------- FEATURE 6: Terminal-style command feature list ---------- */
+  .cmd-list{margin-top:50px; display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.cmd-list{grid-template-columns:1fr;}}
+  .cmd-item{
+    font-family:var(--mono); font-size:14px; padding:16px 18px;
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:8px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .cmd-item .arrow{color:var(--purple-bright);}
+  .cmd-item .cmd-desc{color:var(--text-dim); font-family:var(--sans); font-size:13.5px; margin-top:4px;}
+
+  /* ---------- FEATURE 7: Animated counters ---------- */
+  .stats-row{display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:60px;}
+  @media(max-width:760px){.stats-row{grid-template-columns:1fr 1fr;}}
+  .stat{text-align:left; border-left:2px solid var(--purple); padding-left:16px;}
+  .stat .num{font-size:clamp(30px,4vw,48px); font-weight:700; font-family:var(--mono); color:var(--blue-bright);}
+  .stat .label{color:var(--text-dim); font-size:13px; margin-top:4px;}
+
+  /* ---------- FEATURE 8: Scroll reveal (single orchestrated effect per section) ---------- */
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- FEATURE 9: Contact terminal form ---------- */
+  .contact-wrap{margin-top:50px; display:grid; grid-template-columns:1fr 1fr; gap:50px;}
+  @media(max-width:860px){.contact-wrap{grid-template-columns:1fr;}}
+  .contact-terminal{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .contact-terminal .term-body{padding:24px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-family:var(--mono); font-size:12px; color:var(--purple-bright); margin-bottom:8px;}
+  .field label::before{content:"$ ";}
+  .field input, .field textarea{
+    width:100%; background:var(--bg-panel-2); border:1px solid var(--border);
+    border-radius:6px; padding:11px 14px; color:var(--text); font-family:var(--mono); font-size:13px;
+    outline:none; transition:border-color .2s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--blue-bright);}
+  .field textarea{resize:vertical; min-height:90px;}
+  .contact-info{display:flex; flex-direction:column; justify-content:center;}
+  .contact-info h3{font-size:26px; margin-bottom:16px; font-weight:600;}
+  .contact-info p{color:var(--text-dim); line-height:1.8; margin-bottom:26px;}
+  .contact-links{display:flex; flex-direction:column; gap:14px;}
+  .contact-links a{
+    color:var(--text); text-decoration:none; font-family:var(--mono); font-size:14px;
+    display:flex; align-items:center; gap:10px; transition:color .2s;
+  }
+  .contact-links a:hover{color:var(--cyan);}
+  .contact-links a .icon{color:var(--purple-bright);}
+
+  /* ---------- FEATURE 10: Footer with glowing social + back-to-top ---------- */
+  footer{
+    border-top:1px solid var(--border); padding:40px 6vw; margin-top:60px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+  }
+  footer p{font-family:var(--mono); font-size:12px; color:var(--text-dim);}
+  .social-row{display:flex; gap:18px;}
+  .social-row a{
+    width:38px; height:38px; border-radius:8px; border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--text-dim);
+    text-decoration:none; font-family:var(--mono); font-size:13px; transition:all .2s;
+  }
+  .social-row a:hover{color:var(--bg); background:linear-gradient(120deg,var(--blue),var(--purple)); border-color:transparent; box-shadow:0 0 20px rgba(122,162,255,0.5);}
+
+  #back-top{
+    position:fixed; bottom:26px; right:26px; z-index:60;
+    width:46px; height:46px; border-radius:50%;
+    background:var(--bg-panel); border:1px solid var(--border); color:var(--blue-bright);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    opacity:0; pointer-events:none; transition:opacity .3s ease, transform .2s ease;
+    font-family:var(--mono);
+  }
+  #back-top.show{opacity:1; pointer-events:auto;}
+  #back-top:hover{transform:translateY(-3px); border-color:var(--blue-bright);}
+</style>
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+<div class="bg-glow"></div>
+<div class="scanlines"></div>
+
+<nav>
+  <div class="nav-brand"><span class="dot"></span>izman.dev</div>
+  <div class="nav-links">
+    <a href="#about">about</a>
+    <a href="#skills">skills</a>
+    <a href="#projects">projects</a>
+    <a href="#contact">contact</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="terminal-window">
+    <div class="term-bar">
+      <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+      <span class="term-title">zsh — 80x10</span>
+    </div>
+    <div class="term-body">
+      <div><span class="prompt">guest@portfolio</span>:<span class="path">~</span>$ whoami</div>
+      <div id="typed-line">&nbsp;</div>
+    </div>
+  </div>
+
+  <h1 class="headline">Membangun antarmuka yang rapi, cepat, dan enak dipakai.</h1>
+  <p class="hero-sub">// Front-end developer yang senang mengubah ide sederhana jadi produk digital yang jalan mulus di semua layar.</p>
+
+  <div class="hero-cta">
+    <a href="#projects" class="btn btn-primary">Lihat proyek</a>
+    <a href="#contact" class="btn btn-ghost">Hubungi saya</a>
+  </div>
+
+  <div class="status-bar">
+    <div>STATUS <span class="val" id="clock-status">ONLINE</span></div>
+    <div>UPTIME <span class="val" id="uptime">00:00:00</span></div>
+    <div>LOCATION <span class="val">ID // GMT+8</span></div>
+  </div>
+</header>
+
+<section class="section reveal" id="about">
+  <div class="eyebrow"><span class="line"></span>tentang</div>
+  <h2 class="section-title">Bukan cuma nulis kode — tapi menyelesaikan masalah orang lewat layar.</h2>
+
+  <div class="about-grid">
+    <div class="about-text">
+      <p>Saya mulai belajar web development dari nol, mencoba-coba HTML dan CSS sampai akhirnya jatuh cinta pada proses membangun sesuatu yang bisa langsung dilihat dan dipakai orang lain.</p>
+      <p>Sekarang saya fokus membuat <strong>website yang cepat, rapi secara struktur, dan enak dilihat</strong> — dari halaman profil sederhana sampai proyek dengan interaksi yang lebih kompleks.</p>
+      <p>Saya percaya desain yang bagus itu tidak berisik: setiap elemen punya alasan untuk ada di sana.</p>
+    </div>
+
+    <div class="skills" id="skills">
+      <div class="skill">
+        <div class="skill-top"><span>HTML & CSS</span><span>92%</span></div>
+        <div class="skill-track"><div class="skill-fill" data-w="92"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-top"><span>JavaScript</span><span>78%</span></div>
+        <div class="skill-track"><div class="skill-fill" data-w="78"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-top"><span>Git & GitHub</span><span>70%</span></div>
+        <div class="skill-track"><div class="skill-fill" data-w="70"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-top"><span>UI/UX Design</span><span>65%</span></div>
+        <div class="skill-track"><div class="skill-fill" data-w="65"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="num" data-count="14">0</div><div class="label">Proyek dikerjakan</div></div>
+    <div class="stat"><div class="num" data-count="2026">0</div><div class="label">Belajar sejak</div></div>
+    <div class="stat"><div class="num" data-count="100">0</div><div class="label">% niat belajar</div></div>
+    <div class="stat"><div class="num" data-count="24">0</div><div class="label">Jam ngoding/minggu</div></div>
+  </div>
+</section>
+
+<section class="section reveal" id="projects">
+  <div class="eyebrow"><span class="line"></span>proyek</div>
+  <h2 class="section-title">Beberapa hal yang sudah saya bangun.</h2>
+
+  <div class="projects-grid">
+    <div class="project-card">
+      <span class="project-tag">web // portofolio</span>
+      <h3>Personal Portfolio Site</h3>
+      <p>Website profil pribadi dengan tema gelap dan animasi ringan untuk menampilkan karya dan kontak.</p>
+      <div class="project-stack"><span>HTML</span><span>CSS</span><span>JS</span></div>
+    </div>
+    <div class="project-card">
+      <span class="project-tag">web // auth</span>
+      <h3>Halaman Login & Signup</h3>
+      <p>Form login sederhana dengan validasi input dan tampilan yang bersih untuk latihan alur autentikasi.</p>
+      <div class="project-stack"><span>HTML</span><span>CSS</span></div>
+    </div>
+    <div class="project-card">
+      <span class="project-tag">web // organisasi</span>
+      <h3>Website Sekolah/Kelas</h3>
+      <p>Landing page informasi kelas atau organisasi lengkap dengan navigasi antar halaman.</p>
+      <div class="project-stack"><span>HTML</span><span>CSS</span><span>GitHub Pages</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="eyebrow"><span class="line"></span>fitur website ini</div>
+  <h2 class="section-title">Yang bikin situs ini terasa hidup.</h2>
+
+  <div class="cmd-list">
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Animasi hujan kode di latar belakang</div><div class="cmd-desc">Efek matrix warna biru-ungu yang bergerak halus, bukan hijau klasik.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Terminal hero dengan efek mengetik</div><div class="cmd-desc">Teks perkenalan muncul seolah sedang diketik langsung di terminal.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Widget status sistem live</div><div class="cmd-desc">Menampilkan status online dan uptime yang berjalan real-time.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Progress bar skill animasi</div><div class="cmd-desc">Bar keahlian terisi otomatis saat bagian About terlihat di layar.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Kartu proyek dengan efek glow</div><div class="cmd-desc">Cahaya lembut mengikuti posisi kursor saat hover di kartu proyek.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Angka statistik berjalan naik</div><div class="cmd-desc">Counter animasi dari 0 menuju angka aslinya saat pertama terlihat.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Reveal halus saat scroll</div><div class="cmd-desc">Setiap bagian muncul dengan transisi lembut saat mulai terlihat.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Form kontak bergaya terminal</div><div class="cmd-desc">Input pesan didesain menyerupai command line yang playful.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Navigasi transparan melayang</div><div class="cmd-desc">Bar navigasi tetap terlihat dan blur saat halaman di-scroll.</div></div></div>
+    <div class="cmd-item"><span class="arrow">›</span><div><div>Tombol kembali ke atas</div><div class="cmd-desc">Muncul otomatis setelah scroll jauh, memudahkan navigasi cepat.</div></div></div>
+  </div>
+</section>
+
+<section class="section reveal" id="contact">
+  <div class="eyebrow"><span class="line"></span>kontak</div>
+  <h2 class="section-title">Ada proyek atau ide? Ceritakan ke saya.</h2>
+
+  <div class="contact-wrap">
+    <div class="contact-terminal">
+      <div class="term-bar">
+        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+        <span class="term-title">send-message.sh</span>
+      </div>
+      <div class="term-body">
+        <div class="field">
+          <label>nama</label>
+          <input type="text" placeholder="Nama kamu">
+        </div>
+        <div class="field">
+          <label>email</label>
+          <input type="email" placeholder="email@contoh.com">
+        </div>
+        <div class="field">
+          <label>pesan</label>
+          <textarea placeholder="Tulis pesan di sini..."></textarea>
+        </div>
+        <a href="#" class="btn btn-primary" style="display:inline-block;">./kirim_pesan.sh</a>
+      </div>
+    </div>
+
+    <div class="contact-info">
+      <h3>Mari terhubung</h3>
+      <p>Terbuka untuk kolaborasi proyek kecil, tugas bareng, atau sekadar diskusi soal web development.</p>
+      <div class="contact-links">
+        <a href="mailto:hello@izman.dev"><span class="icon">→</span> hello@izman.dev</a>
+        <a href="#"><span class="icon">→</span> github.com/nn8165193-prog</a>
+        <a href="#"><span class="icon">→</span> linkedin.com/in/izman</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 izman.dev — dibangun dengan niat dan banyak kopi.</p>
+  <div class="social-row">
+    <a href="#" title="GitHub">GH</a>
+    <a href="#" title="LinkedIn">IN</a>
+    <a href="#" title="Instagram">IG</a>
+  </div>
+</footer>
+
+<div id="back-top">↑</div>
+
+<script>
+  // ---- Matrix-style rain (blue/purple) ----
+  const canvas = document.getElementById('rain');
+  const ctx = canvas.getContext('2d');
+  let w, h, cols, drops;
+  const chars = "01アイウエオカキクケコ<>{}[]/#$%&アノ".split("");
+
+  function setup(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cols = Math.floor(w / 18);
+    drops = new Array(cols).fill(1);
+  }
+  setup();
+  window.addEventListener('resize', setup);
+
+  const palette = ['#4f7dff', '#7aa2ff', '#9b6bff', '#b78dff', '#5ee7ff'];
+
+  function draw(){
+    ctx.fillStyle = 'rgba(5,6,15,0.08)';
+    ctx.fillRect(0,0,w,h);
+    ctx.font = '14px JetBrains Mono, monospace';
+    for(let i=0;i<drops.length;i++){
+      const text = chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillStyle = palette[Math.floor(Math.random()*palette.length)];
+      ctx.fillText(text, i*18, drops[i]*18);
+      if(drops[i]*18 > h && Math.random() > 0.975){
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 55);
+
+  // ---- Typing effect ----
+  const line = document.getElementById('typed-line');
+  const fullText = "A developer with a curious mind and a love for clean interfaces.";
+  let idx = 0;
+  function typeChar(){
+    if(idx <= fullText.length){
+      line.innerHTML = fullText.slice(0, idx) + '<span class="cursor"></span>';
+      idx++;
+      setTimeout(typeChar, 38);
+    }
+  }
+  setTimeout(typeChar, 600);
+
+  // ---- Uptime clock ----
+  const start = Date.now();
+  function updateUptime(){
+    const diff = Math.floor((Date.now() - start) / 1000);
+    const hh = String(Math.floor(diff/3600)).padStart(2,'0');
+    const mm = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    const ss = String(diff%60).padStart(2,'0');
+    document.getElementById('uptime').textContent = `${hh}:${mm}:${ss}`;
+  }
+  setInterval(updateUptime, 1000);
+
+  // ---- Scroll reveal ----
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in'); }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>revealObserver.observe(el));
+
+  // ---- Skill bars animate on view ----
+  const skillFills = document.querySelectorAll('.skill-fill');
+  const skillObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.style.width = e.target.dataset.w + '%';
+        skillObserver.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.4});
+  skillFills.forEach(el=>skillObserver.observe(el));
+
+  // ---- Counters animate on view ----
+  const counters = document.querySelectorAll('.num');
+  const counterObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const el = e.target;
+        const target = parseInt(el.dataset.count, 10);
+        let cur = 0;
+        const step = Math.max(1, Math.ceil(target/60));
+        const tick = setInterval(()=>{
+          cur += step;
+          if(cur >= target){ cur = target; clearInterval(tick); }
+          el.textContent = cur;
+        }, 20);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, {threshold:0.5});
+  counters.forEach(el=>counterObserver.observe(el));
+
+  // ---- Project card cursor glow ----
+  document.querySelectorAll('.project-card').forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    });
+  });
+
+  // ---- Back to top ----
+  const backTop = document.getElementById('back-top');
+  window.addEventListener('scroll', ()=>{
+    if(window.scrollY > 500){ backTop.classList.add('show'); }
+    else{ backTop.classList.remove('show'); }
+  });
+  backTop.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+</script>
+
+</body>
+</html>
